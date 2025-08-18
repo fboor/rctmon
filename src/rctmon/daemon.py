@@ -325,7 +325,7 @@ class Daemon:
             try:
                 consumed = self._current_frame.consume(self._recv_buf)
             except FrameCRCMismatch as exc:
-                framelog.warning('CRC mismatch received, consumed %d bytes. Got %s but calculated %s',
+                framelog.debug('CRC mismatch received, consumed %d bytes. Got %s but calculated %s',
                                  exc.consumed_bytes, exc.received_crc, exc.calculated_crc)
                 self._current_frame = None
                 consumed = exc.consumed_bytes

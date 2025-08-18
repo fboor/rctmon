@@ -336,6 +336,6 @@ class BatteryManager:
             elif oid == 0xC0DF2978:
                 self.readings.cycles = ensure_type(value, int)
             else:
-                log.warning('_cb_readings: unhandled oid 0x%X', oid)
+                log.debug('_cb_readings: unhandled oid 0x%X', oid)
         except TypeError:
             log.warning('Got wrong type %s for %s', type(value), R.get_by_id(oid).name)

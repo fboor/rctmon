@@ -76,8 +76,8 @@ class DeviceManager:
         :param oid: OID to add a callback for.
         :param handler: Function to call.
         '''
-        if oid in self._callbacks:
-            log.warning('Overwriting callback for 0x%X')
+        if (oid in self._callbacks and self._callbacks[oid] != handler):
+            log.warning('Overwriting callback for 0x%X', oid)
         log.debug('Adding callback for 0x%X to %s.%s', oid, handler.__class__.__name__, handler.__name__)
         self._callbacks[oid] = handler
 
@@ -226,7 +226,7 @@ class DeviceManager:
 
         log.debug('got frame %s', repr(frame))
         if frame.id not in self._frames:
-            log.warn('Index 0x%x not in frames list', frame.id)
+            log.debug('Index 0x%x not in frames list', frame.id)
         else:
             try:
                 value: Any = decode_value(self._frames[frame.id].oinfo.response_data_type, frame.data)
@@ -342,7 +342,7 @@ class DeviceManager:
                                  interval=120, handler=self._cb_solar_generator)
                     self.add_ids(['energy.e_dc_total[1]', 'energy.e_dc_day[1]'], interval=300, handler=self._cb_energy)
             else:
-                log.warning('_cb_inventory: unhandled oid 0x%X', oid)
+                log.debug('_cb_inventory: unhandled oid 0x%X', oid)
         except TypeError:
             log.warning('Got wrong type %s for %s', type(value), R.get_by_id(oid).name)
 
@@ -412,7 +412,7 @@ class DeviceManager:
             elif oid == 0x474F80D5:
                 self.readings.inverter_insulation_negative = ensure_type(value, float)
             else:
-                log.warning('_cb_inverter: unhandled oid 0x%X', oid)
+                log.debug('_cb_inverter: unhandled oid 0x%X', oid)
         except TypeError:
             log.warning('Got wrong type %s for %s', type(value), R.get_by_id(oid).name)
 
@@ -431,7 +431,7 @@ class DeviceManager:
             elif oid == 0xF0B436DD:
                 self.readings.household.load_l3 = ensure_type(value, float)
             else:
-                log.warning('_cb_household: unhandled oid 0x%X', oid)
+                log.debug('_cb_household: unhandled oid 0x%X', oid)
         except TypeError:
             log.warning('Got wrong type %s for %s', type(value), R.get_by_id(oid).name)
 
@@ -480,7 +480,7 @@ class DeviceManager:
             elif oid == 0x1C4A665F:
                 self.readings.grid.frequency = ensure_type(value, float)
             else:
-                log.warning('_cb_grid: unhandled oid 0x%X', oid)
+                log.debug('_cb_grid: unhandled oid 0x%X', oid)
         except TypeError:
             log.warning('Got wrong type %s for %s', type(value), R.get_by_id(oid).name)
 
@@ -569,7 +569,7 @@ class DeviceManager:
             elif oid == 0xFBF3CE97:
                 self.readings.energy.solar_generator_b_day = ensure_type(value, float)
             else:
-                log.warning('_cb_energy: unhandled oid 0x%X', oid)
+                log.debug('_cb_energy: unhandled oid 0x%X', oid)
         except TypeError:
             log.warning('Got wrong type %s for %s', type(value), R.get_by_id(oid).name)
 
