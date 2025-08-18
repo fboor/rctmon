@@ -311,6 +311,9 @@ class EnergyReadings(AbstractReadings):
     grid_feed_sum: Optional[float] = None
     solar_generator_a_sum: Optional[float] = None
     solar_generator_b_sum: Optional[float] = None
+    solar_generator_a_day: Optional[float] = None
+    solar_generator_b_day: Optional[float] = None
+    ext_production_day: Optional[float] = None
 
     def collect(self, name: str) -> Generator:
         if self.ac_sum is not None:
@@ -341,7 +344,16 @@ class EnergyReadings(AbstractReadings):
                 solar_generator.add_metric([name, 'generator_a'], self.solar_generator_a_sum)
             if self.solar_generator_b_sum is not None:
                 solar_generator.add_metric([name, 'generator_b'], self.solar_generator_b_sum)
+            if self.solar_generator_a_day is not None:
+                solar_generator.add_metric([name, 'generator_a_day'], self.solar_generator_a_day)
+            if self.solar_generator_b_day is not None:
+                solar_generator.add_metric([name, 'generator_b_day'], self.solar_generator_b_day)
             yield solar_generator
+        if self.ext_production_day is not None:
+            inverter = GaugeMetricFamily(
+                'rctmon_external_energy_production_day', 'External energy production in Wh', labels=['inverter'])
+            inverter.add_metric([name], self.ext_production_day)
+            yield inverter
 
 
 @dataclass
@@ -369,6 +381,8 @@ class Readings(AbstractReadings):
     have_generator_b: Optional[bool] = None
     solar_generator_b = SolarGeneratorReadings("b")
 
+    #: s0_external_power
+    external_power: Optional[float] = None
     #: prim_sm.state
     inverter_status: Optional[int] = None
     #: prim_sm.island_flag
@@ -397,6 +411,9 @@ class Readings(AbstractReadings):
     #: rb485.available
     power_switch_available: Optional[bool] = False
     power_switch_readings = PowerSwitchReadings()
+    
+    # io board configuration
+    io_board_io1_usage: Optional[int] = None
 
     def collect(self, name: str) -> Generator:
         '''

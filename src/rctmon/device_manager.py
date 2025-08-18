@@ -226,7 +226,7 @@ class DeviceManager:
 
         log.debug('got frame %s', repr(frame))
         if frame.id not in self._frames:
-            log.warning('Index 0x%x not in frames list', frame.id)
+            log.warn('Index 0x%x not in frames list', frame.id)
         else:
             try:
                 value: Any = decode_value(self._frames[frame.id].oinfo.response_data_type, frame.data)
@@ -299,6 +299,14 @@ class DeviceManager:
                     self.add_ids(['rb485.u_l_grid[0]', 'rb485.u_l_grid[1]', 'rb485.u_l_grid[2]', 'rb485.f_grid[0]',
                                   'rb485.f_grid[1]', 'rb485.f_grid[2]', 'rb485.f_wr[0]', 'rb485.f_wr[1]',
                                   'rb485.f_wr[2]'], interval=10, handler=self._cb_power_switch)
+            # io1_usage
+            elif oid == 0x90F123FA:
+                self.readings.io_board_io1_usage = ensure_type(value, int)
+		# check if an external power meter is configured for ext1
+                if value is 0x0A:
+                    # insert IDs for external power
+                    self.add_ids(['energy.e_ext_day', 'io_board.s0_external_power'], handler=self._cb_energy)
+
             # inverter_sn
             elif oid == 0x7924ABD9:
                 self.readings.serial_number = ensure_type(value, str)
@@ -323,7 +331,7 @@ class DeviceManager:
                                  handler=self._cb_solar_generator)
                     self.add_ids(['dc_conv.dc_conv_struct[0].u_target', 'dc_conv.dc_conv_struct[0].mpp.mpp_step'],
                                  interval=120, handler=self._cb_solar_generator)
-                    self.add_ids(['energy.e_dc_total[0]'], interval=300, handler=self._cb_energy)
+                    self.add_ids(['energy.e_dc_total[0]', 'energy.e_dc_day[0]'], interval=300, handler=self._cb_energy)
             # check for solar generator B
             elif oid == 0xFED51BD2:
                 self.readings.have_generator_b = ensure_type(value, bool) is True
@@ -332,7 +340,7 @@ class DeviceManager:
                                  handler=self._cb_solar_generator)
                     self.add_ids(['dc_conv.dc_conv_struct[1].u_target', 'dc_conv.dc_conv_struct[1].mpp.mpp_step'],
                                  interval=120, handler=self._cb_solar_generator)
-                    self.add_ids(['energy.e_dc_total[1]'], interval=300, handler=self._cb_energy)
+                    self.add_ids(['energy.e_dc_total[1]', 'energy.e_dc_day[1]'], interval=300, handler=self._cb_energy)
             else:
                 log.warning('_cb_inventory: unhandled oid 0x%X', oid)
         except TypeError:
@@ -353,7 +361,7 @@ class DeviceManager:
 
             self.add_ids(['inverter_sn', 'svnversion', 'parameter_file',
                           'dc_conv.dc_conv_struct[0].enabled', 'dc_conv.dc_conv_struct[1].enabled',
-                          'rb485.available'], interval=0, inventory=False, is_inventory=True,
+                          'rb485.available', "io_board.io1_usage"], interval=0, inventory=False, is_inventory=True,
                          handler=self._cb_inventory)
             self.add_ids(['power_mng.battery_type'], interval=0, inventory=False, is_inventory=True,
                          handler=self.battery_manager.cb_battery_type)
@@ -530,8 +538,11 @@ class DeviceManager:
         Callback for storing energy information.
         '''
         try:
+            # s0_external_power
+            if oid == 0xE96F1844:
+                self.readings.external_power = ensure_type(value, float)
             # energy.e_ac_total
-            if oid == 0xB1EF67CE:
+            elif oid == 0xB1EF67CE:
                 self.readings.energy.ac_sum = ensure_type(value, float)
             # energy.e_load_total
             elif oid == 0xEFF4B537:
@@ -548,6 +559,15 @@ class DeviceManager:
             # energy.e_dc_total[1]
             elif oid == 0x68EEFD3D:
                 self.readings.energy.solar_generator_b_sum = ensure_type(value, float)
+            # energy.e_ext_day
+            elif oid == 0xB9A026F9:
+                self.readings.energy.ext_production_day = ensure_type(value, float)
+            # energy.e_dc_day[0]
+            elif oid == 0x2AE703F2:
+                self.readings.energy.solar_generator_a_day = ensure_type(value, float)
+            # energy.e_dc_day[1]
+            elif oid == 0xFBF3CE97:
+                self.readings.energy.solar_generator_b_day = ensure_type(value, float)
             else:
                 log.warning('_cb_energy: unhandled oid 0x%X', oid)
         except TypeError:
@@ -603,6 +623,7 @@ class DeviceManager:
         self.readings.have_generator_a = None
         self.readings.have_generator_b = None
         self.readings.power_switch_available = None
+        self.readings.io_board_io1_usage = None
 
         self.name = ''
         self.readings.serial_number = ''
