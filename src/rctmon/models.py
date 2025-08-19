@@ -309,6 +309,8 @@ class EnergyReadings(AbstractReadings):
     household_sum: Optional[float] = None
     grid_load_sum: Optional[float] = None
     grid_feed_sum: Optional[float] = None
+    grid_load_day: Optional[float] = None
+    grid_feed_day: Optional[float] = None
     solar_generator_a_sum: Optional[float] = None
     solar_generator_b_sum: Optional[float] = None
     solar_generator_a_day: Optional[float] = None
@@ -329,12 +331,16 @@ class EnergyReadings(AbstractReadings):
         if self.grid_load_sum is not None:
             grid_load = GaugeMetricFamily('rctmon_energy_grid_load_sum', 'Total grid load energy in Wh',
                                           labels=['inverter'])
-            grid_load.add_metric([name], self.grid_load_sum)
+            if self.grid_load_sum is not None:
+                grid_load.add_metric([name], self.grid_load_sum)
+                if self.grid_load_day is not None:
+                    grid_feed.add_metric([name], self.grid_load_day)
             yield grid_load
         if self.grid_feed_sum is not None:
             grid_feed = GaugeMetricFamily('rctmon_energy_grid_feed_sum', 'Total grid feed energy in Wh',
                                           labels=['inverter'])
-            grid_feed.add_metric([name], self.grid_feed_sum)
+            if self.grid_feed_day is not None:
+                grid_feed.add_metric([name], self.grid_feed_day)
             yield grid_feed
         if self.solar_generator_a_sum is not None or self.solar_generator_b_sum is not None:
             solar_generator = GaugeMetricFamily('rctmon_energy_solar_generator_sum',

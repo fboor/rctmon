@@ -379,7 +379,8 @@ class DeviceManager:
                           'fault[3].flt', 'iso_struct.Riso', 'iso_struct.Rp', 'iso_struct.Rn'],
                           interval=10, inventory=False, handler=self._cb_inverter)
             self.add_ids(['energy.e_ac_day', 'energy.e_ac_month', 'energy.e_ac_year', 'energy.e_ac_total',
-                          'energy.e_grid_feed_total', 'energy.e_grid_load_total','energy.e_load_total'],
+                          'energy.e_grid_feed_total', 'energy.e_grid_load_total','energy.e_load_total',
+                          'energy.e_grid_feed_day', 'energy.e_grid_load_day'],
                          interval=300, inventory=False, handler=self._cb_energy)
 
     def _cb_inverter(self, oid: int, value: Any) -> None:
@@ -550,9 +551,15 @@ class DeviceManager:
             # energy.e_grid_feed_total
             elif oid == 0x44D4C533:
                 self.readings.energy.grid_feed_sum = ensure_type(value, float)
+	    # energy.e_grid_feed_day
+            elif oid == 0x3C87C4F5:
+                self.readings.energy.grid_feed_day = ensure_type(value, float)
             # energy.e_grid_load_total
             elif oid == 0x62FBE7DC:
                 self.readings.energy.grid_load_sum = ensure_type(value, float)
+            # energy.e_grid_load_day
+            elif oid == 0x867DEF7D:
+                self.readings.energy.grid_load_day = ensure_type(value, float)
             # energy.e_dc_total[0]
             elif oid == 0xFC724A9E:
                 self.readings.energy.solar_generator_a_sum = ensure_type(value, float)
