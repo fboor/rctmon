@@ -307,6 +307,7 @@ class EnergyReadings(AbstractReadings):
     '''
     ac_sum: Optional[float] = None
     household_sum: Optional[float] = None
+    household_day: Optional[float] = None
     grid_load_sum: Optional[float] = None
     grid_feed_sum: Optional[float] = None
     grid_load_day: Optional[float] = None
@@ -328,6 +329,11 @@ class EnergyReadings(AbstractReadings):
                                           labels=['inverter'])
             household.add_metric([name], self.household_sum)
             yield household
+        if self.household_day is not None:
+            householdday = GaugeMetricFamily('rctmon_energy_household_day', 'Today household energy in Wh',
+                                          labels=['inverter'])
+            household.add_metric([name], self.household_day)
+            yield householdday
         if self.grid_load_sum is not None:
             grid_load = GaugeMetricFamily('rctmon_energy_grid_load_sum', 'Total grid load energy in Wh',
                                           labels=['inverter'])

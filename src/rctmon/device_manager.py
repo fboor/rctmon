@@ -379,7 +379,7 @@ class DeviceManager:
                           'fault[3].flt', 'iso_struct.Riso', 'iso_struct.Rp', 'iso_struct.Rn'],
                           interval=10, inventory=False, handler=self._cb_inverter)
             self.add_ids(['energy.e_ac_day', 'energy.e_ac_month', 'energy.e_ac_year', 'energy.e_ac_total',
-                          'energy.e_grid_feed_total', 'energy.e_grid_load_total','energy.e_load_total',
+                          'energy.e_grid_feed_total', 'energy.e_grid_load_total','energy.e_load_total','energy.e_load_day',
                           'energy.e_grid_feed_day', 'energy.e_grid_load_day'],
                          interval=300, inventory=False, handler=self._cb_energy)
 
@@ -548,6 +548,9 @@ class DeviceManager:
             # energy.e_load_total
             elif oid == 0xEFF4B537:
                 self.readings.energy.household_sum = ensure_type(value, float)
+            # energy.e_load_day
+            elif oid == 0x2F3C1D7D:
+                self.readings.energy.household_day = ensure_type(value, float)
             # energy.e_grid_feed_total
             elif oid == 0x44D4C533:
                 self.readings.energy.grid_feed_sum = ensure_type(value, float)
