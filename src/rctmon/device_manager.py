@@ -305,7 +305,7 @@ class DeviceManager:
 		# check if an external power meter is configured for ext1
                 if value is 0x0A:
                     # insert IDs for external power
-                    self.add_ids(['energy.e_ext_day', 'io_board.s0_external_power'], handler=self._cb_energy)
+                    self.add_ids(['energy.e_ext_day', 'energy.e_ext_total', 'io_board.s0_external_power'], handler=self._cb_energy)
 
             # inverter_sn
             elif oid == 0x7924ABD9:
@@ -572,6 +572,9 @@ class DeviceManager:
             # energy.e_ext_day
             elif oid == 0xB9A026F9:
                 self.readings.energy.ext_production_day = ensure_type(value, float)
+            # energy.e_ext_total
+            elif oid == 0xA59C8428:
+                self.readings.energy.ext_production_sum = ensure_type(value, float)
             # energy.e_dc_day[0]
             elif oid == 0x2AE703F2:
                 self.readings.energy.solar_generator_a_day = ensure_type(value, float)

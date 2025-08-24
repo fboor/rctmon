@@ -317,6 +317,7 @@ class EnergyReadings(AbstractReadings):
     solar_generator_a_day: Optional[float] = None
     solar_generator_b_day: Optional[float] = None
     ext_production_day: Optional[float] = None
+    ext_production_sum: Optional[float] = None
 
     def collect(self, name: str) -> Generator:
         if self.ac_sum is not None:
@@ -365,6 +366,8 @@ class EnergyReadings(AbstractReadings):
             inverter = GaugeMetricFamily(
                 'rctmon_external_energy_production_day', 'External energy production in Wh', labels=['inverter'])
             inverter.add_metric([name], self.ext_production_day)
+            if self.ext_production_sum is not None:
+                inverter.add_metric([name], self.ext_production_sum)
             yield inverter
 
 
