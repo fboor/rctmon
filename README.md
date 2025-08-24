@@ -50,6 +50,25 @@ Quick peek at the metrics: `curl localhost:9831/metrics`. Note that the applicat
 setup first (how many batteries, is a power switch available and so on) and thus takes a moment for all the metrics to
 appear.
 
+## Configure MQTT
+
+A simple configuration for use with a MQTT server running at `192.168.0.2:1883` 
+could look like this:
+
+```yaml
+---
+mqtt:
+  enable: true
+  mqtt_host: 192.168.0.2
+  mqtt_port: 1883
+  auth_user: mqttuser
+  auth_pass: "mqttpassword"
+
+```
+
+MQTT defaults to port 1883, so the port setting is optional.
+
+
 ## Debugging
 
 For most problems, starting the application in Debug Mode is sufficient. Simply add `--debug`, like so: `rctmon --debug
